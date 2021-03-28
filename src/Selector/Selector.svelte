@@ -20,10 +20,9 @@
 </style>
 
 <div class="header">
-  <MonthTitle />
   <Prev />
+  <MonthTitle />
   <Next />
 
-  <FinishBtn />
-
+  <!-- <FinishBtn /> -->
 </div>
