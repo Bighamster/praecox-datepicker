@@ -8,6 +8,11 @@
   let nowDate = current_date || new Date();
   let selected;
 
+  const handleChangeDate = e => {
+    console.log('handleChangeDate', e.detail);
+    current_date = new Date(e.detail);
+  }
+
   // $: console.log('selected', selected)
   $: if( isPresent(selected) ) current_date = new Date(selected)
   $: console.log('current_date', current_date, selected)
@@ -20,7 +25,7 @@
 	<Datepicker
     lang="ru"
     {nowDate}
-	  bind:selected
+    on:change={ handleChangeDate }
 	/>
 </div>
 

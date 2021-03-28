@@ -71,9 +71,6 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    function add_flush_callback(fn) {
-        flush_callbacks.push(fn);
-    }
     let flushing = false;
     const seen_callbacks = new Set();
     function flush() {
@@ -144,14 +141,6 @@ var app = (function () {
                 }
             });
             block.o(local);
-        }
-    }
-
-    function bind(component, name, callback) {
-        const index = component.$$.props[name];
-        if (index !== undefined) {
-            component.$$.bound[index] = callback;
-            callback(component.$$.ctx[index]);
         }
     }
     function create_component(block) {
@@ -478,6 +467,20 @@ var app = (function () {
     }
     function onMount(fn) {
         get_current_component().$$.on_mount.push(fn);
+    }
+    function createEventDispatcher() {
+        const component = get_current_component();
+        return (type, detail) => {
+            const callbacks = component.$$.callbacks[type];
+            if (callbacks) {
+                // TODO are there situations where events could be dispatched
+                // in a server (non-DOM) environment?
+                const event = custom_event(type, detail);
+                callbacks.slice().forEach(fn => {
+                    fn.call(component, event);
+                });
+            }
+        };
     }
     function setContext(key, context) {
         get_current_component().$$.context.set(key, context);
@@ -2418,6 +2421,8 @@ var app = (function () {
     		if ($praecoxCalendar.pickerMode == "free") {
     			freePicker(day);
     		}
+
+    		set_store_value(praecoxCalendar, $praecoxCalendar.changed += 1, $praecoxCalendar);
     	}
 
     	function testSelectedRange(n) {
@@ -4854,6 +4859,8 @@ var app = (function () {
 
     function instance$b($$self, $$props, $$invalidate) {
     	let $praecoxCalendarConfig;
+    	let $praecoxCalendarData;
+    	const dispatch = createEventDispatcher();
     	let { nowDate = new Date() } = $$props;
     	let { lang = "en" } = $$props;
     	let { viewDate = nowDate } = $$props;
@@ -4882,36 +4889,45 @@ var app = (function () {
     		disabled,
     		selected,
     		focused: marked,
-    		pickerDone
+    		pickerDone,
+    		changed: 0
     	});
 
+    	component_subscribe($$self, praecoxCalendarData, value => $$invalidate(14, $praecoxCalendarData = value));
     	setContext("praecoxCalendarData", praecoxCalendarData);
     	let praecoxCalendarConfig = getContext("praecoxCalendarData");
-    	component_subscribe($$self, praecoxCalendarConfig, value => $$invalidate(13, $praecoxCalendarConfig = value));
+    	component_subscribe($$self, praecoxCalendarConfig, value => $$invalidate(15, $praecoxCalendarConfig = value));
 
     	beforeUpdate(() => {
     		set_store_value(praecoxCalendarConfig, $praecoxCalendarConfig.nowDate = nowDate, $praecoxCalendarConfig);
-    		$$invalidate(2, selected = $praecoxCalendarConfig.selected);
-    		$$invalidate(3, pickerDone = $praecoxCalendarConfig.pickerDone);
+    		$$invalidate(3, selected = $praecoxCalendarConfig.selected);
+    		$$invalidate(4, pickerDone = $praecoxCalendarConfig.pickerDone);
     	});
 
     	$$self.$$set = $$props => {
-    		if ("nowDate" in $$props) $$invalidate(4, nowDate = $$props.nowDate);
-    		if ("lang" in $$props) $$invalidate(5, lang = $$props.lang);
-    		if ("viewDate" in $$props) $$invalidate(6, viewDate = $$props.viewDate);
-    		if ("pickerRule" in $$props) $$invalidate(7, pickerRule = $$props.pickerRule);
-    		if ("disabled" in $$props) $$invalidate(8, disabled = $$props.disabled);
-    		if ("selected" in $$props) $$invalidate(2, selected = $$props.selected);
-    		if ("marked" in $$props) $$invalidate(9, marked = $$props.marked);
-    		if ("weekNameMode" in $$props) $$invalidate(10, weekNameMode = $$props.weekNameMode);
-    		if ("monthNameMode" in $$props) $$invalidate(11, monthNameMode = $$props.monthNameMode);
+    		if ("nowDate" in $$props) $$invalidate(5, nowDate = $$props.nowDate);
+    		if ("lang" in $$props) $$invalidate(6, lang = $$props.lang);
+    		if ("viewDate" in $$props) $$invalidate(7, viewDate = $$props.viewDate);
+    		if ("pickerRule" in $$props) $$invalidate(8, pickerRule = $$props.pickerRule);
+    		if ("disabled" in $$props) $$invalidate(9, disabled = $$props.disabled);
+    		if ("selected" in $$props) $$invalidate(3, selected = $$props.selected);
+    		if ("marked" in $$props) $$invalidate(10, marked = $$props.marked);
+    		if ("weekNameMode" in $$props) $$invalidate(11, weekNameMode = $$props.weekNameMode);
+    		if ("monthNameMode" in $$props) $$invalidate(12, monthNameMode = $$props.monthNameMode);
     		if ("theme" in $$props) $$invalidate(0, theme = $$props.theme);
-    		if ("reSelected" in $$props) $$invalidate(12, reSelected = $$props.reSelected);
-    		if ("pickerDone" in $$props) $$invalidate(3, pickerDone = $$props.pickerDone);
+    		if ("reSelected" in $$props) $$invalidate(13, reSelected = $$props.reSelected);
+    		if ("pickerDone" in $$props) $$invalidate(4, pickerDone = $$props.pickerDone);
+    	};
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$praecoxCalendarData*/ 16384) {
+    			 if ($praecoxCalendarData.changed) dispatch("change", $praecoxCalendarData.selected);
+    		}
     	};
 
     	return [
     		theme,
+    		praecoxCalendarData,
     		praecoxCalendarConfig,
     		selected,
     		pickerDone,
@@ -4923,7 +4939,8 @@ var app = (function () {
     		marked,
     		weekNameMode,
     		monthNameMode,
-    		reSelected
+    		reSelected,
+    		$praecoxCalendarData
     	];
     }
 
@@ -4933,18 +4950,18 @@ var app = (function () {
     		if (!document.getElementById("svelte-1gg8d67-style")) add_css$a();
 
     		init$1(this, options, instance$b, create_fragment$c, safe_not_equal$1, {
-    			nowDate: 4,
-    			lang: 5,
-    			viewDate: 6,
-    			pickerRule: 7,
-    			disabled: 8,
-    			selected: 2,
-    			marked: 9,
-    			weekNameMode: 10,
-    			monthNameMode: 11,
+    			nowDate: 5,
+    			lang: 6,
+    			viewDate: 7,
+    			pickerRule: 8,
+    			disabled: 9,
+    			selected: 3,
+    			marked: 10,
+    			weekNameMode: 11,
+    			monthNameMode: 12,
     			theme: 0,
-    			reSelected: 12,
-    			pickerDone: 3
+    			reSelected: 13,
+    			pickerDone: 4
     		});
     	}
     }
@@ -4994,21 +5011,13 @@ var app = (function () {
     	let t1;
     	let div;
     	let datepicker;
-    	let updating_selected;
     	let current;
 
-    	function datepicker_selected_binding(value) {
-    		/*datepicker_selected_binding*/ ctx[3](value);
-    	}
+    	datepicker = new Calendar({
+    			props: { lang: "ru", nowDate: /*nowDate*/ ctx[0] }
+    		});
 
-    	let datepicker_props = { lang: "ru", nowDate: /*nowDate*/ ctx[1] };
-
-    	if (/*selected*/ ctx[0] !== void 0) {
-    		datepicker_props.selected = /*selected*/ ctx[0];
-    	}
-
-    	datepicker = new Calendar({ props: datepicker_props });
-    	binding_callbacks.push(() => bind(datepicker, "selected", datepicker_selected_binding));
+    	datepicker.$on("change", /*handleChangeDate*/ ctx[1]);
 
     	return {
     		c() {
@@ -5026,17 +5035,7 @@ var app = (function () {
     			mount_component(datepicker, div, null);
     			current = true;
     		},
-    		p(ctx, [dirty]) {
-    			const datepicker_changes = {};
-
-    			if (!updating_selected && dirty & /*selected*/ 1) {
-    				updating_selected = true;
-    				datepicker_changes.selected = /*selected*/ ctx[0];
-    				add_flush_callback(() => updating_selected = false);
-    			}
-
-    			datepicker.$set(datepicker_changes);
-    		},
+    		p: noop,
     		i(local) {
     			if (current) return;
     			transition_in(datepicker.$$.fragment, local);
@@ -5060,23 +5059,19 @@ var app = (function () {
     	let nowDate = current_date || new Date();
     	let selected;
 
-    	function datepicker_selected_binding(value) {
-    		selected = value;
-    		$$invalidate(0, selected);
-    	}
+    	const handleChangeDate = e => {
+    		console.log("handleChangeDate", e.detail);
+    		$$invalidate(2, current_date = new Date(e.detail));
+    	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*selected*/ 1) {
-    			// $: console.log('selected', selected)
-    			 if (isPresent(selected)) $$invalidate(2, current_date = new Date(selected));
-    		}
-
-    		if ($$self.$$.dirty & /*current_date, selected*/ 5) {
+    		if ($$self.$$.dirty & /*current_date*/ 4) {
     			 console.log("current_date", current_date, selected);
     		}
     	};
 
-    	return [selected, nowDate, current_date, datepicker_selected_binding];
+    	 if (isPresent(selected)) $$invalidate(2, current_date = new Date(selected));
+    	return [nowDate, handleChangeDate, current_date];
     }
 
     class App extends SvelteComponent {
