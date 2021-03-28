@@ -41,6 +41,10 @@ var app = (function () {
     function space() {
         return text(' ');
     }
+    function listen(node, event, handler, options) {
+        node.addEventListener(event, handler, options);
+        return () => node.removeEventListener(event, handler, options);
+    }
     function attr(node, attribute, value) {
         if (value == null)
             node.removeAttribute(attribute);
@@ -370,7 +374,7 @@ var app = (function () {
     function empty() {
         return text$1('');
     }
-    function listen(node, event, handler, options) {
+    function listen$1(node, event, handler, options) {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
     }
@@ -1219,7 +1223,7 @@ var app = (function () {
     			if (if_block) if_block.m(div0, null);
 
     			if (!mounted) {
-    				dispose = listen(div2, "click", /*switchView*/ ctx[2]);
+    				dispose = listen$1(div2, "click", /*switchView*/ ctx[2]);
     				mounted = true;
     			}
     		},
@@ -1301,7 +1305,7 @@ var app = (function () {
     			if (if_block) if_block.m(div0, null);
 
     			if (!mounted) {
-    				dispose = listen(div2, "click", /*switchView*/ ctx[2]);
+    				dispose = listen$1(div2, "click", /*switchView*/ ctx[2]);
     				mounted = true;
     			}
     		},
@@ -1718,7 +1722,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div1, "click", /*prev*/ ctx[2]);
+    				dispose = listen$1(div1, "click", /*prev*/ ctx[2]);
     				mounted = true;
     			}
     		},
@@ -1957,7 +1961,7 @@ var app = (function () {
     			current = true;
 
     			if (!mounted) {
-    				dispose = listen(div1, "click", /*next*/ ctx[2]);
+    				dispose = listen$1(div1, "click", /*next*/ ctx[2]);
     				mounted = true;
     			}
     		},
@@ -2289,7 +2293,7 @@ var app = (function () {
     			append$1(span, t);
 
     			if (!mounted) {
-    				dispose = listen(span, "click", /*pick*/ ctx[15]);
+    				dispose = listen$1(span, "click", /*pick*/ ctx[15]);
     				mounted = true;
     			}
     		},
@@ -2835,7 +2839,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler);
+    				dispose = listen$1(td, "click", click_handler);
     				mounted = true;
     			}
     		},
@@ -2912,7 +2916,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler_1);
+    				dispose = listen$1(td, "click", click_handler_1);
     				mounted = true;
     			}
     		},
@@ -2989,7 +2993,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler_2);
+    				dispose = listen$1(td, "click", click_handler_2);
     				mounted = true;
     			}
     		},
@@ -3066,7 +3070,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler_3);
+    				dispose = listen$1(td, "click", click_handler_3);
     				mounted = true;
     			}
     		},
@@ -3449,7 +3453,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler);
+    				dispose = listen$1(td, "click", click_handler);
     				mounted = true;
     			}
     		},
@@ -3526,7 +3530,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler_1);
+    				dispose = listen$1(td, "click", click_handler_1);
     				mounted = true;
     			}
     		},
@@ -3603,7 +3607,7 @@ var app = (function () {
     			append$1(td, t1);
 
     			if (!mounted) {
-    				dispose = listen(td, "click", click_handler_2);
+    				dispose = listen$1(td, "click", click_handler_2);
     				mounted = true;
     			}
     		},
@@ -4861,6 +4865,7 @@ var app = (function () {
     	let $praecoxCalendarConfig;
     	let $praecoxCalendarData;
     	const dispatch = createEventDispatcher();
+    	let changed = 0;
     	let { nowDate = new Date() } = $$props;
     	let { lang = "en" } = $$props;
     	let { viewDate = nowDate } = $$props;
@@ -4890,13 +4895,13 @@ var app = (function () {
     		selected,
     		focused: marked,
     		pickerDone,
-    		changed: 0
+    		changed
     	});
 
-    	component_subscribe($$self, praecoxCalendarData, value => $$invalidate(14, $praecoxCalendarData = value));
+    	component_subscribe($$self, praecoxCalendarData, value => $$invalidate(15, $praecoxCalendarData = value));
     	setContext("praecoxCalendarData", praecoxCalendarData);
     	let praecoxCalendarConfig = getContext("praecoxCalendarData");
-    	component_subscribe($$self, praecoxCalendarConfig, value => $$invalidate(15, $praecoxCalendarConfig = value));
+    	component_subscribe($$self, praecoxCalendarConfig, value => $$invalidate(16, $praecoxCalendarConfig = value));
 
     	beforeUpdate(() => {
     		set_store_value(praecoxCalendarConfig, $praecoxCalendarConfig.nowDate = nowDate, $praecoxCalendarConfig);
@@ -4920,8 +4925,15 @@ var app = (function () {
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*$praecoxCalendarData*/ 16384) {
-    			 if ($praecoxCalendarData.changed) dispatch("change", $praecoxCalendarData.selected);
+    		if ($$self.$$.dirty & /*$praecoxCalendarData, changed*/ 49152) {
+    			 if ($praecoxCalendarData.changed > changed) {
+    				$$invalidate(14, changed = $praecoxCalendarData.changed);
+    				dispatch("change", $praecoxCalendarData.selected);
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*nowDate*/ 32) {
+    			 console.log("nowDate", nowDate);
     		}
     	};
 
@@ -4940,6 +4952,7 @@ var app = (function () {
     		weekNameMode,
     		monthNameMode,
     		reSelected,
+    		changed,
     		$praecoxCalendarData
     	];
     }
@@ -5009,9 +5022,13 @@ var app = (function () {
     function create_fragment$d(ctx) {
     	let h1;
     	let t1;
+    	let button;
+    	let t3;
     	let div;
     	let datepicker;
     	let current;
+    	let mounted;
+    	let dispose;
 
     	datepicker = new Calendar({
     			props: { lang: "ru", nowDate: /*nowDate*/ ctx[0] }
@@ -5024,6 +5041,9 @@ var app = (function () {
     			h1 = element("h1");
     			h1.textContent = "Test 5";
     			t1 = space();
+    			button = element("button");
+    			button.textContent = "Assign nowDate";
+    			t3 = space();
     			div = element("div");
     			create_component(datepicker.$$.fragment);
     			attr(div, "class", "wrapper svelte-2xqtjb");
@@ -5031,11 +5051,22 @@ var app = (function () {
     		m(target, anchor) {
     			insert(target, h1, anchor);
     			insert(target, t1, anchor);
+    			insert(target, button, anchor);
+    			insert(target, t3, anchor);
     			insert(target, div, anchor);
     			mount_component(datepicker, div, null);
     			current = true;
+
+    			if (!mounted) {
+    				dispose = listen(button, "click", /*click_handler*/ ctx[3]);
+    				mounted = true;
+    			}
     		},
-    		p: noop,
+    		p(ctx, [dirty]) {
+    			const datepicker_changes = {};
+    			if (dirty & /*nowDate*/ 1) datepicker_changes.nowDate = /*nowDate*/ ctx[0];
+    			datepicker.$set(datepicker_changes);
+    		},
     		i(local) {
     			if (current) return;
     			transition_in(datepicker.$$.fragment, local);
@@ -5048,30 +5079,35 @@ var app = (function () {
     		d(detaching) {
     			if (detaching) detach(h1);
     			if (detaching) detach(t1);
+    			if (detaching) detach(button);
+    			if (detaching) detach(t3);
     			if (detaching) detach(div);
     			destroy_component(datepicker);
+    			mounted = false;
+    			dispose();
     		}
     	};
     }
 
     function instance$c($$self, $$props, $$invalidate) {
-    	let current_date = "2021-01-30";
-    	let nowDate = current_date || new Date();
+    	let current_date = "2021-02-18";
+    	let nowDate; // = current_date || new Date();
     	let selected;
-
-    	const handleChangeDate = e => {
-    		console.log("handleChangeDate", e.detail);
-    		$$invalidate(2, current_date = new Date(e.detail));
-    	};
+    	const handleChangeDate = e => $$invalidate(2, current_date = new Date(e.detail));
+    	const click_handler = e => $$invalidate(0, nowDate = "2021-01-30");
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*current_date*/ 4) {
-    			 console.log("current_date", current_date, selected);
+    			 console.log("current_date", current_date);
+    		}
+
+    		if ($$self.$$.dirty & /*nowDate*/ 1) {
+    			 console.log("App.nowDate", nowDate);
     		}
     	};
 
     	 if (isPresent(selected)) $$invalidate(2, current_date = new Date(selected));
-    	return [nowDate, handleChangeDate, current_date];
+    	return [nowDate, handleChangeDate, current_date, click_handler];
     }
 
     class App extends SvelteComponent {
