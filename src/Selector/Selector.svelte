@@ -23,7 +23,7 @@
 </style>
 
 <div class="header">
-  {#if praecoxCalendarData.finishBtn }
+  {#if $praecoxCalendarData.finishBtn }
 
     <MonthTitle />
     <Prev />

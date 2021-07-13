@@ -21,6 +21,7 @@
     lang="ru"
     nowDate={ selected }
     bind:selected
+    finishBtn={false}
     on:change = { handleChangeDate }
 	/>
 </div>
