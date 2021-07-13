@@ -6,9 +6,19 @@
 
   const handleChangeDate = e => console.log('handleChangeDate', new Date(e.detail));
 
+  const reloadDisabled = dates => {
+    const arr = [];
+
+    for(let i=0, len=dates.length; i < len; i++) {
+      if( i % 2 ) {
+        arr.push(`${dates[i].getFullYear()}-${dates[i].getMonth() + 1}-${dates[i].getDate()}`);
+      }
+    }
+
+    return arr;
+  }
+
   // $: console.log('selected', selected)
-  // $: if( isPresent(selected) ) current_date = new Date(selected)
-  $: console.log('selected', selected)
 
 </script>
 
@@ -22,6 +32,7 @@
     nowDate={ selected }
     bind:selected
     finishBtn={false}
+    {reloadDisabled}
     on:change = { handleChangeDate }
 	/>
 </div>
