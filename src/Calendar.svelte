@@ -114,10 +114,10 @@
   export let finishBtn = true;
 
   /**
-    * External function that get used to reload the disabled array on Next/Prev action
-    *
-   */
-   export let reloadDisabled;
+   * External function that get used to reload the disabled array on Next/Prev action
+   *
+  */
+  export let reloadDisabled;
 
   const praecoxCalendarData = writable({
     nowDate: [],
