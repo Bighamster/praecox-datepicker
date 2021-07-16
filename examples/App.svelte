@@ -15,9 +15,10 @@
       day = dates[i].getDate();
       date = `${dates[i].getFullYear()}-${dates[i].getMonth() + 1}-${dates[i].getDate()}`;
 
-      console.log(i, !!(day % 2), date);
+      // console.log(i, !!(day % 2), date, dates[i]);
 
       if( day % 2 ) {
+        // arr.push(date);
         arr.push(dates[i]);
       }
     }
