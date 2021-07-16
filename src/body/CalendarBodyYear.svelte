@@ -17,6 +17,7 @@
     let td = d.getDate();
     $praecoxCalendar.viewDate = `${ty}-${i + 1}-${td}`;
     $praecoxCalendar.view = "month";
+    $praecoxCalendar.reloadDisabled();
   }
 </script>
 

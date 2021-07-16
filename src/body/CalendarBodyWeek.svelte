@@ -11,7 +11,7 @@
       return;
     }
     let thisDate = new Date(day).getTime();
-    if (typeof arr[0] === "object") {
+    if (typeof arr[0] === "object") { console.log('object');
       for (let index = 0; index < arr.length; index++) {
         let arrItem = arr[index];
         if (

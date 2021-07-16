@@ -8,10 +8,17 @@
 
   const reloadDisabled = dates => {
     const arr = [];
+    let date, day;
 
     for(let i=0, len=dates.length; i < len; i++) {
-      if( i % 2 ) {
-        arr.push(`${dates[i].getFullYear()}-${dates[i].getMonth() + 1}-${dates[i].getDate()}`);
+
+      day = dates[i].getDate();
+      date = `${dates[i].getFullYear()}-${dates[i].getMonth() + 1}-${dates[i].getDate()}`;
+
+      console.log(i, !!(day % 2), date);
+
+      if( day % 2 ) {
+        arr.push(dates[i]);
       }
     }
 
